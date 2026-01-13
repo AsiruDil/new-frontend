@@ -35,10 +35,10 @@ export default function ProductCard({ product }) {
                 {/* Prices */}
                 <div className="mt-3 flex items-center gap-2">
                     <span className="text-lg font-bold text-green-600">
-                        ₹{product.price}
+                        Rs{product.price}
                     </span>
                     <span className="text-sm line-through text-gray-400">
-                        ₹{product.lablePrice}
+                        Rs{product.lablePrice}
                     </span>
                 </div>
 
