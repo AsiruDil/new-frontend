@@ -33,3 +33,7 @@ function App() {
 }
 
 export default App
+
+//https://xhafhbkamswznkhywyph.supabase.co
+//sb_publishable_njZBjpKXF5UFuMqu1PEsCA_3mb0DiCC
+

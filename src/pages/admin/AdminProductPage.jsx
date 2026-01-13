@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { sampleProduct } from "../../assets/sampleData"
 import axios from "axios"
+import { Link } from "react-router-dom"
 
 export default function AdminProductsPage(){
     const [products,setProducts]=useState(sampleProduct)
@@ -13,7 +14,8 @@ export default function AdminProductsPage(){
 
   
     return(
-    <div className="w-full h-full bg-red-300 max-h-full overflow-y-scroll">
+    <div className="w-full h-full bg-red-300 max-h-full overflow-y-scroll relative">
+        <Link to ="/admin/add-product"className="absolute w-[50px] h-[50px] text-xl bottom-5 right-5 bg-green-500 text-white font-bold cursor-pointer flex justify-center items-center rounded">+</Link>
        <table className="w-full text-center">
         <thead>
             <tr>
