@@ -1,10 +1,15 @@
+import axios from "axios"
 import { useState } from "react"
+import toast from "react-hot-toast"
 import { BiMinus, BiPlus, BiTrash } from "react-icons/bi"
+import { HiOutlineClipboardDocumentList } from "react-icons/hi2"
 import { Link, useLocation } from "react-router-dom"
 
 export default function CheckoutPage(){
     const location =useLocation()
     const [cart,setCart]=useState(location.state?.cart || []) 
+    const [phoneNumber,setPhoneNumber]=useState("")
+    const [address,setAddress]=useState("")
     
     function getTotal(){
         let total=0;
@@ -31,16 +36,63 @@ export default function CheckoutPage(){
         }
     }
 
+    async function  placeOrder(){
+        const token=localStorage.getItem("token")
+        if(!token){
+            toast.error("Please login to place oder")
+            return
+        }
+        const orderInfromation={
+            products:[],
+            phone:phoneNumber,
+            address:address
+            
+        }
+        for(let i=0;i<cart.length;i++){
+            const item={
+                productId:cart[i].productId,
+                qty:cart[i].qty
+            }
+            orderInfromation.products[i]=item
+        }
+        try{
+        const res=await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/orders",orderInfromation,{
+            headers:{
+                Authorization:"Bearer " + token
+            }})
+            toast.success("order placed successfully")
+            console.log(res.data)
+        }catch(err){
+                console.log(err)
+                toast.error("error placing order")
+                return
+    }
+    }
+
     return(
         <div className="w-full h-full flex flex-col items-center pt-4 relative">
-            <div className="w-[200px] h-[80px] shadow-2xl absolute top-1 right-1 flex flex-col justify-center items-center">
+            <div className="w-[400px]  shadow-2xl absolute top-1 right-1 flex flex-col justify-center items-center p-1 gap-10">
                 <p className="text-2xl text-secondary font-bold">Total:
                     <span className="text-accent font-bold mx-2">
                        {getTotal().toFixed(2)}
                     </span>
                 
                 </p>
-                <button className="text-white bg-accent px-4 py-2 rounded-lg font-bold hover:bg-secondary transition-all duration-300">
+                <div>
+                <input type="text" placeholder="phone number" className="w-full h-[40px] px-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-accent" 
+                value={phoneNumber}
+                onChange={(e)=>setPhoneNumber(e.target.value)}
+                />
+                 <input type="text" placeholder="address" className="w-full h-[40px] px-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-accent mt-2" 
+                value={phoneNumber}
+                onChange={(e)=>setAddress(e.target.value)}
+                />
+                </div>
+                <button className="text-white bg-accent px-4 py-2 rounded-lg font-bold hover:bg-secondary transition-all duration-300"
+                    onClick={()=>{
+                      placeOrder();  
+                    }}
+                >
                     Place oder
                 </button>
 
@@ -79,7 +131,7 @@ export default function CheckoutPage(){
                                 </div>
                                  <button className="absolute text-red-600 hover:bg-red-600 hover:text-white rounded-full p-2 right-[-35px] cursor-pointer"
                                  onClick={()=>{
-                                    
+                                    removeFromCart(index)                                    
 
                                  }}><BiTrash/></button>
                             </div>
