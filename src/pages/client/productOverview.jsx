@@ -35,14 +35,22 @@ export default function ProductOverview(){
        <>
        {
         state=="success" && (
-        <div className="w-full h-full flex
-        ">
-           <div className="w-[50%] h-full flex justify-center items-center">
+        <div className="w-full h-full flex flex-col md:flex-row">
+             <h1 className="w-full md:hidden  block text-cente text-4xl my-8 text-secondary font-semibold text-center">{product.name}
+                {
+                   product.altName.map((altName,index)=>{
+                        return(
+                           <span key={index} className="text-4xl text-gray-600">{"|"+ altName}</span>
+                        )
+                   })
+                }
+            </h1>
+           <div className="w-full md:w-[50%] h-full flex justify-center items-center">
             <ImageSlider images={product.images}/>
            </div>
-           <div className="w-[50%] flex justify-center items-center h-full">
-            <div className="w-[500px] h-[600px] flex flex-col items-center ">
-            <h1 className="w-full text-cente text-4xl text-secondary font-semibold text-center">{product.name}
+           <div className="w-full md:w-[50%] flex justify-center items-center  md:h-full">
+            <div className="w-[500px] md:h-[600px] flex flex-col items-center ">
+            <h1 className="w-full hidden  md:block text-cente text-4xl text-secondary font-semibold text-center">{product.name}
                 {
                    product.altName.map((altName,index)=>{
                         return(
@@ -62,7 +70,7 @@ export default function ProductOverview(){
                     :<span className="text-4xl mx-4 font-bold text-accent">{product.price.toFixed(2)}</span>
                     
             }
-             <div className="w-full flex justify-center items-center mt-4 ">
+             <div className="w-full flex flex-col gap-2 md:flex-row justify-center items-center mt-4 ">
                 <button className="w-[200px] h-[50px] mx-4 cursor-pointer bg-accent text-white rounded-2xl hover:bg-accent/80 transition-all duration-300" 
                 onClick={()=>{
                     console.log("old cart")

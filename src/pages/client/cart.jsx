@@ -7,7 +7,7 @@ export default function CartPage(){
     const [cart,setCart]=useState(getCart())
     return(
         <div className="w-full h-full flex flex-col items-center pt-4 relative">
-            <div className="w-[200px] h-[80px] shadow-2xl absolute top-1 right-1 flex flex-col justify-center items-center">
+            <div className="w-[200px] h-[80px] shadow-2xl absolute bottom-1 md:top-1 right-1 flex flex-col justify-center items-center">
                 <p className="text-2xl text-secondary font-bold">Total:
                     <span className="text-accent font-bold mx-2">
                         {getTotal().toFixed(2)}
@@ -29,7 +29,7 @@ export default function CartPage(){
                 cart.map(
                     (item)=>{
                         return(
-                            <div key={item.productId} className="w-[600px] h-[100px] my-4 rounded-tl-3xl rounded-bl-3xl bg-primary shadow-2xl flex flex-row relative justify-center items-center ">
+                            <div key={item.productId} className="w-full md:w-[600px] md:h-[100px] my-4 rounded-tl-3xl rounded-bl-3xl bg-primary shadow-2xl flex flex-col md:flex-row relative justify-center items-center ">
                                 <img src={item.image} className="w-[100px] h-[100px] object-cover rounded-3xl"/>
                                 <div className="w-[250px] h-full flex flex-col items-start pl-4  ">
                                     <h2 className="text-xl text-secondary font-semibold">{item.name}</h2>

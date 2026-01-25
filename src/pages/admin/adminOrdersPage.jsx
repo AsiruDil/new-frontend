@@ -16,12 +16,11 @@ export default function AdminOrderPage() {
     const token = localStorage.getItem("token")
     if (!token) {
       toast.error("Please login first")
-      setIsLoading(false)
+    
       return
     }
 
-    axios
-      .get(import.meta.env.VITE_BACKEND_URL + "/api/orders", {
+     axios.get(import.meta.env.VITE_BACKEND_URL + "/api/orders", {
         headers: { Authorization: "Bearer " + token },
       })
       .then((res) => {
@@ -34,18 +33,19 @@ export default function AdminOrderPage() {
       })
   }, [])
 
-  function getStatusStyle(status) {
-    switch (status?.toUpperCase()) {
-      case "PAID":
-        return "bg-green-100 text-green-700"
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-700"
-      case "CANCELLED":
-        return "bg-red-100 text-red-700"
-      default:
-        return "bg-gray-100 text-gray-600"
-    }
-  }
+  // Optional: keep for table display
+  // function getStatusStyle(status) {
+  //   switch (status?.toUpperCase()) {
+  //     case "PAID":
+  //       return "bg-green-100 text-green-700"
+  //     case "PENDING":
+  //       return "bg-yellow-100 text-yellow-700"
+  //     case "CANCELLED":
+  //       return "bg-red-100 text-red-700"
+  //     default:
+  //       return "bg-gray-100 text-gray-600"
+  //   }
+  // }
 
   return (
     <div className="w-full h-full p-6 overflow-y-auto">
@@ -69,13 +69,51 @@ export default function AdminOrderPage() {
                   <h2 className="text-xl font-bold">
                     Order #{activeOrder.orderId}
                   </h2>
+
+                  {/* ✅ INLINE STATUS IN MODAL */}
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
-                      activeOrder.status
-                    )}`}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold
+                      ${
+                        activeOrder.status?.toUpperCase() === "PAID"
+                          ? "bg-green-100 text-green-700"
+                          : activeOrder.status?.toUpperCase() === "PENDING"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : activeOrder.status?.toUpperCase() === "CANCELLED"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-gray-100 text-gray-600"
+                      }
+                    `}
                   >
                     {activeOrder.status}
                   </span>
+                  <select onChange={async (e)=>{
+                   const updateedValue=e.target.value
+                   try{
+                      const token=localStorage.getItem("token");
+                      await axios.put(import.meta.env.VITE_BACKEND_URL+ "/api/orders/"+activeOrder.orderId+"/"+updateedValue,{},{
+                        headers:{
+                          Authorization:"Bearer "+token
+                        }
+                      }
+
+                      )
+                    
+                    setIsLoading(true)
+                    const updatedOrder={...activeOrder}
+                    updatedOrder.status=updateedValue;
+                    setActiveOrder(updatedOrder)
+
+                   }catch(e){
+                      toast.error("Error uploading order status")
+                      console.log(e)
+                   }
+                  }}>
+                    <option selected disabled >Change Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="returned">Returned</option>
+                  </select>
                 </div>
 
                 {/* Customer Info */}
@@ -125,10 +163,7 @@ export default function AdminOrderPage() {
                           const subtotal = price * qty
 
                           return (
-                            <tr
-                              key={index}
-                              className="border-t hover:bg-gray-50"
-                            >
+                            <tr key={index} className="border-t hover:bg-gray-50">
                               <td className="p-3">
                                 <img
                                   src={item.productInfo.images?.[0]}
@@ -136,22 +171,10 @@ export default function AdminOrderPage() {
                                   className="w-14 h-14 object-cover rounded"
                                 />
                               </td>
-
-                              <td className="p-3 font-medium">
-                                {item.productInfo.name}
-                              </td>
-
-                              <td className="p-3 text-center">
-                                Rs. {price}
-                              </td>
-
-                              <td className="p-3 text-center">
-                                {qty}
-                              </td>
-
-                              <td className="p-3 text-right font-semibold">
-                                Rs. {subtotal}
-                              </td>
+                              <td className="p-3 font-medium">{item.productInfo.name}</td>
+                              <td className="p-3 text-center">Rs. {price}</td>
+                              <td className="p-3 text-center">{qty}</td>
+                              <td className="p-3 text-right font-semibold">Rs. {subtotal}</td>
                             </tr>
                           )
                         })}
@@ -163,17 +186,15 @@ export default function AdminOrderPage() {
                 {/* Totals */}
                 <div className="flex justify-end gap-6 text-sm">
                   <p>
-                    <span className="font-semibold">Labelled:</span>{" "}
-                    Rs. {activeOrder.labelledTotle}
+                    <span className="font-semibold">Labelled:</span> Rs. {activeOrder.labelledTotle}
                   </p>
                   <p>
-                    <span className="font-semibold">Total:</span>{" "}
-                    Rs. {activeOrder.total}
+                    <span className="font-semibold">Total:</span> Rs. {activeOrder.total}
                   </p>
                 </div>
 
-                {/* Close */}
-                <div className="text-right">
+                {/* Actions */}
+                <div className="text-right space-x-2">
                   <button
                     onClick={() => setIsModalOpen(false)}
                     className="px-4 py-2 bg-accent text-white rounded-lg"
@@ -187,7 +208,6 @@ export default function AdminOrderPage() {
                     Print
                   </button>
                 </div>
-
               </div>
             )}
           </Modal>
@@ -213,37 +233,21 @@ export default function AdminOrderPage() {
                     setActiveOrder(order)
                     setIsModalOpen(true)
                   }}
-                  className={`cursor-pointer border-b hover:bg-accent/10 ${
-                    index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                  }`}
+                  className={`cursor-pointer border-b hover:bg-accent/10 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
                 >
                   <td className="p-4 font-medium">{order.orderId}</td>
                   <td className="p-4">{order.name}</td>
                   <td className="p-4">{order.email}</td>
-                  <td className="p-4 text-right font-semibold">
-                    Rs. {order.total}
-                  </td>
-                  <td className="p-4 text-center">
-                    {new Date(order.date).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-center">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
-                        order.status
-                      )}`}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
+                  <td className="p-4 text-right font-semibold">Rs. {order.total}</td>
+                  <td className="p-4 text-center">{new Date(order.date).toLocaleDateString()}</td>
+                  <td className="p-4 text-center"> {order.status}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
           {orders.length === 0 && (
-            <div className="p-6 text-center text-gray-500">
-              No orders found
-            </div>
+            <div className="p-6 text-center text-gray-500">No orders found</div>
           )}
         </div>
       )}
